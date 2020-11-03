@@ -10,6 +10,14 @@ because on snake I was obsessing over how I was implementing it, not actually ge
 
 "Moving the goal posts" is something I tried not to do tonight. I will watch two videos on solving sudoku, one that inspired me to do this
 and the other from computerphile, then I will call it quits until after stats exam (though I may need a break and that is a whole nother story anyway)
+
+
+ISSUES:
+firstly, I didn't make use of breaking functionality up into functions. maybe im too used to using python for simple scripts.
+i also didn't spend any time before hand thinking if my solution would work (e.g. worst case time big O whatever thing, time complexity)
+Both of these issues meant that if something went wrong then I had a harder time figuring out what and how to solve it
+
+I learned about tkinter and got some more practice turning a problem into an abstraction that I can work with in a program
 '''
 
 
