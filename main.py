@@ -2,16 +2,16 @@
 NUMBERS ARE 0 -> 8 TO MAKE THINGS EASIER
 EMPTY CELLS ARE -1
 '''
-
-grid = [[4, 2, -1, -1, 6, -1, -1, -1, -1],
-        [5, -1, -1, 0, 8, 4, -1, -1, -1],
-        [-1, 8, 7, -1, -1, -1, -1, 5, -1],
-        [7, -1, -1, -1, 5, -1, -1, -1, 2],
-        [3, -1, -1, 7, -1, 2, -1, -1, 0],
-        [6, -1, -1, -1, 1, -1, -1, -1, 5],
-        [-1, 5, -1, -1, -1, -1, 1, 7, -1],
-        [-1, -1, -1, 3, 0, 8, -1, -1, 4],
-        [-1, -1, -1, -1, 7, -1, -1, 6, 8]]
+#grid = [[ 1,  2,  3,  4,  5,  6,  7, -1, -1],
+grid = [[ 4,  2, -1, -1,  6, -1, -1, -1, -1],
+        [ 5, -1, -1,  0,  8,  4, -1, -1, -1],
+        [-1,  8,  7, -1, -1, -1, -1,  5, -1],
+        [ 7, -1, -1, -1,  5, -1, -1, -1,  2],
+        [ 3, -1, -1,  7, -1,  2, -1, -1,  0],
+        [ 6, -1, -1, -1,  1, -1, -1, -1,  5],
+        [-1,  5, -1, -1, -1, -1,  1,  7, -1],
+        [-1, -1, -1,  3,  0,  8, -1, -1,  4],
+        [-1, -1, -1, -1,  7, -1, -1,  6,  8]]
 
 
 def print_game():
@@ -27,6 +27,10 @@ def print_game():
         print()
         if (i + 1) % 3 == 0:
             print()
+
+
+def to_seg_num(row,col):
+    return 3*(row//3) + col//3
 
 
 # checks if if range(9) in set, updating possibilities accordingly
@@ -48,14 +52,13 @@ def update_row_possibilites(rows):
     for row in range(9):
         # update the row possibilties 
         rows[row] = check_set(grid[row], rows[row])
-        # # for each possible number
-        # for num in range(9):
-        #     # the number is only an option if it is not in the row
-        #     if num not in grid[row]:
-        #         rows[row].add(num)
-        #     else:
-        #         rows[row].discard(num)
-    print(rows)
+
+        # if there is only 1 possiblity left, 
+        if len(rows[row]) == 1:
+            # pop from possibility set into last empty cell in row 
+            for cell in grid[row]:
+                if cell == -1:
+                    grid[row][cell] = rows[row].pop()
     return rows
 
 
@@ -65,13 +68,15 @@ def update_col_possibilites(cols):
     for col in range(9):
         # create a list for that column
         thisCol = [grid[i][col] for i in range(9)]
-        # for each possible number
-        for num in range(9):
-            # the number is only an option if it is not in the column
-            if num not in thisCol:
-                cols[col].add(num)
-            else:
-                cols[col].discard(num)
+        # update the column possibilities
+        cols[col] = check_set(thisCol, cols[col])
+
+        #if there is only 1 possibility left,
+        if len(cols[col]) == 1:
+            # pop it from the possibility set into last empty cell in column
+            for rowNum in range(9):
+                if grid[rowNum][col] == -1:
+                    grid[rowNum][col] = cols[col].pop()
     return cols
 
 
@@ -92,9 +97,10 @@ def update_seg_possibilites(segs):
                 for cellCol in range(3):
                     gridCol = 3*segCol + cellCol
                     thisSeg.append(grid[gridRow][gridCol])
-            # for each possible number
-            for num in range(9):
-                pass
+            # update the segment possibilities
+            segNum = 3*segRow + segCol
+            segs[segNum] = check_set(thisSeg, segs[segNum])
+    return segs
 
 
 def update_all_possibilities(possibilities):
@@ -108,27 +114,101 @@ def update_all_possibilities(possibilities):
     return possibilities
 
 
+#returns the length of and index for the smallest set in the list
+def smallest_in(list):
+    min = 10
+    index = None
+    for i in range(9):#len(posses)
+        if len(list[i]) < min:
+            min = len(list[i])
+            index = i
+    return min, index
+
+
+#get the section with fewest possibilities
+def get_smallest_section(possibilities):
+    rows, cols, segs = possibilities
+    # get minumum from each section type
+    rowMin, rowIndex = smallest_in(rows)
+    colMin, colIndex = smallest_in(cols)
+    segMin, segIndex = smallest_in(segs)
+    # find which is minimum section (they may be equal)
+    if rowMin <= colMin:
+        if segMin <= rowMin:
+            #seg is smallest
+            sectionType = 'seg'
+            sectionNum = segIndex
+        else:
+            #row is smallest
+            sectionType = 'row'
+            sectionNum = rowIndex
+    else:
+        if segMin <= colMin:
+           #seg is smallest
+           sectionType = 'seg'
+           sectionNum = segIndex
+        else:
+            #col is smallest
+            sectionType = 'col'
+            sectionNum = colIndex
+    return sectionType, sectionNum
+
+
+def solve(possibilities):
+    rows, cols, segs = possibilities
+
+    solved = False
+    while solved == False:
+        # find section with fewest possibilities
+        sectionType, sectionNum = get_smallest_section(possibilities)
+        # for each empty cell in the section, cross reference with remaining two section possibilities
+        if sectionType == 'row':
+            row = sectionNum
+            for col in range(9):
+                if grid[row][col] == -1:
+                    # 'cross-ref' means find difference between cell section possibilities and hope it leaves 1 option
+                    cell_poss = rows[row] - (cols[col] | segs[to_seg_num(row,col)])
+                    print(cell_poss)
+                    # if there is one possibility for the empty cell, fill it and update possiblities for that cell's sections
+                    if len(cell_poss) == 1:
+                        grid[row][col] = cell_poss.pop()
+                        rows, cols, segs = update_all_possibilities(possibilities)
+                        # restart loop
+                        continue
+                    # if there is more than one possibility for the empty cell TODO 
+
+def initialise_possibilities():
+    global grid
+    #get possibilities for each row,column,segment
+    rows = [set() for i in range(9)]
+    cols = [set() for i in range(9)]
+    segs = [set() for i in range(9)]
+    possibilities = (rows, cols, segs)
+    #update all the possibilities, filling in single possibility sections
+    possibilities = update_all_possibilities(possibilities)
+    rows, cols, segs = possibilities
+    return possibilities
+
+
 def main():
     '''
     update possibilities for each row, column, and segment, putting them into buckets of # of possibilities from 0 -> 9
     if you find any with 1 blank space, fill in the blank space
         and recalc the possibilities for that cells row, col, seg
     if you find any with 2 blank spaces, try to solve it for each of those, and exit the one that runs into an error
-        and recalc the possibilites
+        and recalc the possibilities
 
     '''
     global grid
-    #initial list of possibilities is empty for each row/col/seg
-    rows = [set() for i in range(9)]
-    cols = [set() for i in range(9)]
-    segs = [set() for i in range(9)]
-    possibilities = (rows, cols, segs)
-    #update all the possibilities
+    print('Unsolved Game:')
     print_game()
-    print('solving')
-    possibilities = update_all_possibilities(possibilities)
+    print('Getting initial section possibilities')
+    # possibilities contains a list for rows, cols, segs, each of which contains possibilities for it's row,col,seg. 
+    possibilities = initialise_possibilities()
+    print('Solving...')
+    solve(possibilities)
+    print('Solved:')
     print_game()
-
 
 
 if __name__ == '__main__':
