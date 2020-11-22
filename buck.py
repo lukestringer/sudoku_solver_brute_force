@@ -15,22 +15,22 @@ for row in range(9):
         for potato in range(3):
             seg_num[row].append(3*(row//3) + i)
 
-def print_game(game):
-    print('---------------------')
+
+def cells_to_string(cells):
+    s = '---------------------\n'
     for i in range(9):
         for j in range(9):
-            if game[i][j].contents == -1:
-                print('_', " ", end="", sep="")
+            if cells[i][j].contents == -1:
+                s += '_ '
             else:
-                print(str(game[i][j].contents), " ", end="", sep="")
+                s += str(cells[i][j].contents) + " "
             if (j + 1) % 3 == 0:
-                print("  ", end="")
-        print()
+                s += "  "
+        s += '\n'
         if i == 2 or i == 5:
-            print()
-    print('---------------------')
-    print()
-
+            s += '\n'
+    s += '---------------------\n\n'
+    return s
 
 #get a cell's segment number [0,8] from the cell row and column number
 def seg_num(row,col):
@@ -153,7 +153,7 @@ class Game:
             for r in range(3):
                 for c in range(3):
                     segment.add(cells[row+r][col+c].contents)
-            segs[seg] = possibilities - segment
+            segs[seg].possibilities = possibilities - segment
         return segs
 
 
@@ -163,20 +163,83 @@ class Game:
         self.rows = Game.get_row_possibilities(self.cells)
         self.cols = Game.get_col_possibilities(self.cells)
         self.segs = Game.get_seg_possibilities(self.cells)
+
+    def __repr__(self):
+        s = cells_to_string(self.cells) + 'rows: ' + str(self.rows) + '\n'
+        s += 'cols: '+ str(self.cols) + '\n' + 'segs: '+ str(self.segs)
+        return s
           
 
 '''------------------------------------------------------------------------------------------'''
 '''------------------------------------------------------------------------------------------'''
 '''------------------------------------------------------------------------------------------'''
 
+def game_is_solved(game):
+    # try to find an unsolved cell
+    foundUnsolvedCell = False
+    #break when finding an unsolved cell
+    for cellRow in game.cells:
+        if foundUnsolvedCell == True:
+            break
+        for cell in cellRow:
+            if cell.solved == False:
+                foundUnsolvedCell = True
+                break
+    #if we have not found any unsolved cells, we have solved the game
+    solved = not foundUnsolvedCell
+    return solved
 
+
+def sect_with_fewest(game):
+    min = 99
+    minType = ''
+    mindex = 99
+    for i in range(9):
+        minRow = len(game.rows[i].possibilities)
+        if minRow < min and minRow > 0:
+            min = minRow
+            minType = 'row'
+            mindex = i
+        minCol = len(game.cols[i].possibilities)
+        if minCol < min and minCol > 0:
+            min = minCol
+            minType = 'col'
+            mindex = i
+        minSeg = len(game.cols[i].possibilities)
+        if minSeg < min and minSeg > 0:
+            min = minSeg
+            minType = 'seg'
+            mindex = i
+    return min, minType, mindex
+
+def solve(game):
+    solved = False
+    while solved == False:
+        #test if the game is solved
+        if game_is_solved(game):
+            break
+        #find section with fewest possibilities
+        min, minType, mindex = sect_with_fewest(game)
+        #for each cell in that section
+        # find cell with fewest possibilities 
+        # if cell has 1 possibility, fill it in, check for duplicates in sections (raise error if yes)
+        #                                    and update section possibilities by removing that number
+        #                                       ALSO set cell to solved
+        # if cell has more than one possibility
+        # for each possibility try the first one
+            
 
 def main():
     #hard coded games for now TODO
     raw_unsolved = '4.9....8.3.68.59..5....1..3...7..15..68.3...7.......3........9..9....7.1..3....4.'
     raw_solved = '419376285376825914582491673934782156168539427257164839741658392895243761623917548'
-    game = Game(raw=raw_unsolved)
-    print_game(game.cells)
+    raw_one_match_to_make = '4193762853768259145824916739347821561685394272571.4839741658392895243761623917548'
+    game = Game(raw=raw_one_match_to_make)
+    print(cells_to_string(game.cells))
+    print(game)
+    print('solving')
+    solve(game)
+    
 
     
 if __name__ == "__main__":
