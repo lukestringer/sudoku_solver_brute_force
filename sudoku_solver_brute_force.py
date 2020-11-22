@@ -88,7 +88,7 @@ def solve_with_game(grid):
                 return None
     return grid
 
-
+#TODO generate the games yourself (incl. difficulty settings) instead of using https://qqwing.com/generate.html
 hmm_counter = 0
 # GAME 1
 raw_unsolved =          '4.9....8.'+'3.68.59..'+'5....1..3'   +   '...7..15.'+'.68.3...7'+'.......3.'   +   '.......9.'+'.9....7.1'+'..3....4.'
