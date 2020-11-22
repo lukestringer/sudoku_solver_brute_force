@@ -154,10 +154,13 @@ def get_smallest_section(possibilities):
     return sectionType, sectionNum
 
 
-def solve(possibilities):
+def solve(possibilities, grid):
     rows, cols, segs = possibilities
+    # save the grid in a new variable, in case we hit a dead end
+    solvedGrid = grid
 
     solved = False
+    duplicate = False #tracks if we made an error trying to solve
     while solved == False:
         # find section with fewest possibilities
         sectionType, sectionNum = get_smallest_section(possibilities)
@@ -171,11 +174,14 @@ def solve(possibilities):
                     print(cell_poss)
                     # if there is one possibility for the empty cell, fill it and update possiblities for that cell's sections
                     if len(cell_poss) == 1:
-                        grid[row][col] = cell_poss.pop()
+                        solvedGrid[row][col] = cell_poss.pop()
                         rows, cols, segs = update_all_possibilities(possibilities)
                         # restart loop
                         continue
-                    # if there is more than one possibility for the empty cell TODO 
+                    # if there is more than one possibility for the empty cell 
+                    # try each of them
+                    for poss in cell_poss:
+                        
 
 def initialise_possibilities():
     global grid
@@ -206,7 +212,7 @@ def main():
     # possibilities contains a list for rows, cols, segs, each of which contains possibilities for it's row,col,seg. 
     possibilities = initialise_possibilities()
     print('Solving...')
-    solve(possibilities)
+    solve(possibilities, grid)
     print('Solved:')
     print_game()
 
