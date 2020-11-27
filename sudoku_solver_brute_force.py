@@ -89,29 +89,22 @@ def solve_with_game(grid):
     return grid
 
 #TODO generate the games yourself (incl. difficulty settings) instead of using https://qqwing.com/generate.html
-hmm_counter = 0
-# GAME 1
-raw_unsolved =          '4.9....8.'+'3.68.59..'+'5....1..3'   +   '...7..15.'+'.68.3...7'+'.......3.'   +   '.......9.'+'.9....7.1'+'..3....4.'
-raw_solved =            '419376285'+'376825914'+'582491673'   +   '934782156'+'168539427'+'257164839'   +   '741658392'+'895243761'+'623917548'
-raw_grad_inc =          '....76.85'+'..6825.14'+'5824.1673'   +   '934782.56'+'168539427'+'257164839'   +   '741658392'+'895243761'+'623917548'
+g1 = get_cells_from_raw('.8.....2...72....962.8.3...7.......3......4.6...3271....4...........9.3.....169.7')
+g2 = get_cells_from_raw('4.9....8.3.68.59..5....1..3...7..15..68.3...7.......3........9..9....7.1..3....4.')
+g3 = get_cells_from_raw('78.5..............912........735.9.8..827.16.56..9..2.....6....25.....3...38.....')
+g4 = get_cells_from_raw('648..7.9.2.......3.9.......3....852.....457..87..3...9..6.......8.....4.....94.67')
+g5 = get_cells_from_raw('.71.....45........4..68..3..3.......9.6.74...1....8463...7.......385..7..9......1')
+g6 = get_cells_from_raw('.24........68..7.2..5..3...3..2...6.7..58.13.....4..2...1...5...6...1.4.......3..')
+g7 = get_cells_from_raw('...193..........4..8...7....9.....2.1..9.8...84..2....9..3...14..487.23..38.5.9.7')
 
-# GAME 2 EXPERT
-raw_solved =            '381975624547261389629843715718694253293158476465327198954732861176489532832516947'
-raw_unsolved =          '.8.....2...72....962.8.3...7.......3......4.6...3271....4...........9.3.....169.7'
+grids = [g1,g2,g3,g4,g5,g6,g7]
 
-cells_solved = get_cells_from_raw(raw_solved)
+for grid in grids:
+    print('unsolved')
+    print(cells_to_string(grid))
+    print('trying to solve...')
 
-grid = get_cells_from_raw(raw_unsolved)
-#grid = get_cells_from_raw(raw_grad_inc)
-
-print('unsolved')
-print(cells_to_string(grid))
-#print('solved')
-#print(cells_to_string(cells_solved))
-print('trying to solve...')
-
-#print('h',end='')
-s = solve_with_game(grid)
-print('took '+str(hmm_counter)+' "hmms" to solve')
-print('\nsolved: '+str(s==cells_solved))
-print(cells_to_string(s))
+    hmm_counter = 0
+    s = solve_with_game(grid)
+    print('took '+str(hmm_counter)+' "hmms" to solve')
+    print(cells_to_string(s))
